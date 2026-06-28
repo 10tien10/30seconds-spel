@@ -1,0 +1,1958 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>30 Seconds</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#FF6B35">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="30 Seconds">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+/* ══════════════════════════════════════
+   DESIGN TOKENS
+══════════════════════════════════════ */
+:root {
+  --bg:        #080818;
+  --bg2:       #10102a;
+  --surface:   #181832;
+  --surface2:  #20203e;
+  --border:    rgba(255,255,255,0.09);
+  --border-hi: rgba(255,255,255,0.18);
+
+  --team1:     #FF6B35;   /* oranje */
+  --team2:     #A78BFA;   /* paars  */
+
+  --yellow:    #FBBF24;
+  --green:     #22C55E;
+  --red:       #EF4444;
+  --blue:      #38BDF8;
+
+  --txt:       #F1F5F9;
+  --txt-muted: #64748B;
+  --txt-soft:  #94A3B8;
+
+  --radius:    18px;
+  --radius-sm: 10px;
+
+  --shadow:    0 4px 24px rgba(0,0,0,0.5);
+  --glow1:     0 0 20px rgba(255,107,53,0.25);
+  --glow2:     0 0 20px rgba(167,139,250,0.25);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--txt);
+  font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+/* ══════════════════════════════════════
+   SCREEN SYSTEM
+══════════════════════════════════════ */
+.screen {
+  display: none;
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  padding: 0 16px 32px;
+  flex-direction: column;
+  align-items: center;
+}
+.screen.active { display: flex; }
+
+/* ══════════════════════════════════════
+   TOP BAR
+══════════════════════════════════════ */
+.topbar {
+  width: 100%;
+  max-width: 460px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0 8px;
+  flex-shrink: 0;
+}
+.topbar-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 8px 14px;
+  color: var(--txt-soft);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.topbar-btn:hover { background: var(--surface2); color: var(--txt); border-color: var(--border-hi); }
+.topbar-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--txt-soft);
+  letter-spacing: 0.5px;
+}
+.spacer { width: 80px; }
+
+/* ══════════════════════════════════════
+   SHARED LAYOUT
+══════════════════════════════════════ */
+.content { width: 100%; max-width: 460px; }
+.gap { margin-top: 16px; }
+.gap-lg { margin-top: 24px; }
+.gap-xl { margin-top: 32px; }
+
+.label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--txt-muted);
+  margin-bottom: 8px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+
+/* ══════════════════════════════════════
+   BUTTONS
+══════════════════════════════════════ */
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  border: none;
+  border-radius: var(--radius);
+  padding: 16px;
+  font-size: 1.05rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s;
+  letter-spacing: 0.3px;
+}
+.btn:active { transform: scale(0.97); }
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--team1) 0%, #FBBF24 100%);
+  color: #111;
+  box-shadow: 0 4px 20px rgba(255,107,53,0.35);
+}
+.btn-primary:hover { box-shadow: 0 6px 28px rgba(255,107,53,0.5); }
+
+.btn-ghost {
+  background: var(--surface2);
+  color: var(--txt-soft);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover { color: var(--txt); border-color: var(--border-hi); }
+
+.btn-danger {
+  background: rgba(239,68,68,0.15);
+  color: var(--red);
+  border: 1px solid rgba(239,68,68,0.3);
+}
+.btn-danger:hover { background: rgba(239,68,68,0.25); }
+
+.btn-sm {
+  padding: 9px 16px;
+  font-size: 0.88rem;
+  border-radius: var(--radius-sm);
+  width: auto;
+}
+
+/* ══════════════════════════════════════
+   INPUTS
+══════════════════════════════════════ */
+input[type="text"], select {
+  width: 100%;
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  color: var(--txt);
+  font-size: 1rem;
+  font-weight: 600;
+  outline: none;
+  transition: border-color 0.2s;
+}
+input[type="text"]:focus, select:focus { border-color: var(--team1); }
+select { cursor: pointer; }
+
+/* ══════════════════════════════════════
+   ① START SCREEN
+══════════════════════════════════════ */
+.hero {
+  text-align: center;
+  padding: 20px 0 4px;
+}
+.hero-num {
+  font-size: 5rem;
+  font-weight: 900;
+  line-height: 1;
+  background: linear-gradient(135deg, var(--team1), var(--yellow));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 24px rgba(255,107,53,0.4));
+}
+.hero-sec {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--txt-soft);
+  margin-top: -6px;
+}
+.hero-sub {
+  font-size: 0.88rem;
+  color: var(--txt-muted);
+  margin-top: 6px;
+}
+
+.team-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.team-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.team-dot.t1 { background: var(--team1); box-shadow: 0 0 8px var(--team1); }
+.team-dot.t2 { background: var(--team2); box-shadow: 0 0 8px var(--team2); }
+
+.goal-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+}
+.goal-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.goal-label { font-size: 0.95rem; font-weight: 600; color: var(--txt); }
+.goal-sub { font-size: 0.78rem; color: var(--txt-muted); margin-top: 2px; }
+.goal-select {
+  width: auto;
+  min-width: 90px;
+  padding: 8px 12px;
+  font-size: 0.95rem;
+}
+
+.start-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+/* ══════════════════════════════════════
+   ② WORDS SCREEN
+══════════════════════════════════════ */
+.words-stats {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.stat-pill {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 8px 12px;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--txt-soft);
+}
+.stat-pill strong { display: block; font-size: 1.4rem; font-weight: 900; color: var(--txt); }
+
+.add-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.add-row input { flex: 1; }
+.add-row button { flex-shrink: 0; }
+
+.word-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 52vh;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+.word-item {
+  display: flex;
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 11px 14px;
+  gap: 10px;
+}
+.word-item-text { flex: 1; font-weight: 600; font-size: 0.95rem; }
+.word-item-badge {
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+.badge-custom { background: rgba(255,107,53,0.15); color: var(--team1); }
+.word-delete {
+  background: none;
+  border: none;
+  color: var(--txt-muted);
+  cursor: pointer;
+  font-size: 1.1rem;
+  padding: 2px 4px;
+  border-radius: 6px;
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+.word-delete:hover { color: var(--red); }
+
+.empty-state {
+  text-align: center;
+  padding: 28px;
+  color: var(--txt-muted);
+  font-size: 0.9rem;
+}
+
+/* ── Woordenlijst: tabs + zoek ── */
+.word-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.word-tab {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--txt-muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+}
+.word-tab.active {
+  background: var(--surface2);
+  border-color: var(--team1);
+  color: var(--team1);
+}
+.search-input {
+  width: 100%;
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px 10px 36px;
+  color: var(--txt);
+  font-size: 0.95rem;
+  outline: none;
+  margin-bottom: 10px;
+  transition: border-color 0.2s;
+}
+.search-input:focus { border-color: var(--team1); }
+.search-wrap { position: relative; }
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--txt-muted);
+  font-size: 0.9rem;
+  pointer-events: none;
+}
+.badge-default { background: rgba(148,163,184,0.12); color: var(--txt-muted); }
+.badge-k { background: rgba(34,197,94,0.15);  color: var(--green); }
+.badge-f { background: rgba(56,189,248,0.15);  color: var(--blue); }
+.badge-v { background: rgba(167,139,250,0.15); color: var(--team2); }
+
+/* ── Per-team niveau picker ── */
+.team-age-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 5px 0 12px 22px;
+}
+.team-age-label {
+  font-size: 0.72rem;
+  color: var(--txt-muted);
+  font-weight: 600;
+  flex-shrink: 0;
+  margin-right: 2px;
+}
+.team-age-btn {
+  padding: 5px 9px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface2);
+  color: var(--txt-muted);
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.team-age-btn.active-k { color: var(--green);  border-color: var(--green);  background: rgba(34,197,94,0.1); }
+.team-age-btn.active-f { color: var(--blue);   border-color: var(--blue);   background: rgba(56,189,248,0.1); }
+.team-age-btn.active-v { color: var(--team2);  border-color: var(--team2);  background: rgba(167,139,250,0.1); }
+
+/* ── Niveau badge in beurt/play scherm ── */
+.niveau-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-top: 6px;
+}
+.niveau-k { background: rgba(34,197,94,0.15);  color: var(--green); }
+.niveau-f { background: rgba(56,189,248,0.15);  color: var(--blue); }
+.niveau-v { background: rgba(167,139,250,0.15); color: var(--team2); }
+
+/* ── Category picker (add word form) ── */
+.cat-picker { display: flex; gap: 6px; margin-bottom: 10px; }
+.cat-pick-btn {
+  flex: 1;
+  padding: 7px 6px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--txt-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+}
+.cat-pick-btn.sel-k { color: var(--green);  border-color: var(--green);  background: rgba(34,197,94,0.1); }
+.cat-pick-btn.sel-f { color: var(--blue);   border-color: var(--blue);   background: rgba(56,189,248,0.1); }
+.cat-pick-btn.sel-v { color: var(--team2);  border-color: var(--team2);  background: rgba(167,139,250,0.1); }
+
+/* ── Leaderboard screen ── */
+.lb-podium {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  justify-content: center;
+  margin: 16px 0 24px;
+}
+.lb-place {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 8px;
+  text-align: center;
+}
+.lb-place.first {
+  border-color: var(--yellow);
+  background: rgba(251,191,36,0.07);
+  order: 2;
+  padding-top: 20px;
+}
+.lb-place.second { order: 1; }
+.lb-place.third  { order: 3; }
+.lb-medal { font-size: 1.4rem; margin-bottom: 4px; }
+.lb-team  { font-size: 0.8rem; font-weight: 700; color: var(--txt-soft); margin-bottom: 2px; word-break: break-word; }
+.lb-wins  { font-size: 1.8rem; font-weight: 900; }
+.lb-place.first  .lb-wins { color: var(--yellow); }
+.lb-place.second .lb-wins { color: #C0C0C0; }
+.lb-place.third  .lb-wins { color: #CD7F32; }
+.lb-sub   { font-size: 0.7rem; color: var(--txt-muted); }
+
+.history-list {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.history-item {
+  display: flex;
+  align-items: center;
+  padding: 11px 14px;
+  gap: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.history-item:last-child { border-bottom: none; }
+.hi-trophy { font-size: 1rem; flex-shrink: 0; }
+.hi-info   { flex: 1; }
+.hi-winner { font-size: 0.95rem; font-weight: 700; }
+.hi-meta   { font-size: 0.75rem; color: var(--txt-muted); margin-top: 1px; }
+.hi-score  { font-size: 0.85rem; font-weight: 700; color: var(--txt-muted); flex-shrink: 0; }
+
+/* ══════════════════════════════════════
+   ③ BEURT SCREEN
+══════════════════════════════════════ */
+.beurt-hero {
+  text-align: center;
+  padding: 16px 0 20px;
+}
+.beurt-tag {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--txt-muted);
+  margin-bottom: 6px;
+}
+.beurt-naam {
+  font-size: 2.6rem;
+  font-weight: 900;
+  line-height: 1.1;
+}
+.beurt-ronde {
+  font-size: 0.85rem;
+  color: var(--txt-muted);
+  margin-top: 6px;
+}
+
+.scores-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.score-tile {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  text-align: center;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.score-tile.active-tile { border-color: currentColor; }
+.score-tile.t1 { color: var(--team1); }
+.score-tile.t2 { color: var(--team2); }
+.score-tile.active-tile.t1 { box-shadow: var(--glow1); }
+.score-tile.active-tile.t2 { box-shadow: var(--glow2); }
+.score-tile-name { font-size: 0.8rem; color: var(--txt-muted); margin-bottom: 4px; font-weight: 600; }
+.score-tile-pts { font-size: 2.4rem; font-weight: 900; }
+.score-tile.active-tile .score-tile-pts { color: currentColor; }
+.score-tile.active-tile .score-tile-name { color: currentColor; opacity: 0.7; }
+
+.progress-bar-wrap {
+  background: var(--surface2);
+  border-radius: 999px;
+  height: 6px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+.progress-bar {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.6s ease;
+}
+.progress-bar.t1 { background: var(--team1); }
+.progress-bar.t2 { background: var(--team2); }
+
+.uitleg-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.uitleg-icon { font-size: 1.4rem; flex-shrink: 0; margin-top: 1px; }
+.uitleg-tekst { font-size: 0.88rem; color: var(--txt-soft); line-height: 1.5; }
+.uitleg-tekst strong { color: var(--txt); }
+
+/* ══════════════════════════════════════
+   ④ PLAY SCREEN
+══════════════════════════════════════ */
+.play-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 460px;
+  padding: 16px 0 8px;
+  flex-shrink: 0;
+}
+
+.timer-wrap {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  flex-shrink: 0;
+}
+.timer-wrap svg { transform: rotate(-90deg); }
+.timer-bg { fill: none; stroke: var(--surface2); stroke-width: 7; }
+.timer-arc {
+  fill: none;
+  stroke-width: 7;
+  stroke-linecap: round;
+  stroke-dasharray: 264;
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 0.9s linear, stroke 0.4s;
+}
+.timer-num {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.9rem;
+  font-weight: 900;
+}
+
+.play-team-info {
+  text-align: right;
+}
+.play-team-label { font-size: 0.7rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--txt-muted); margin-bottom: 2px; }
+.play-team-name { font-size: 1.1rem; font-weight: 800; }
+
+.words-card {
+  width: 100%;
+  max-width: 460px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.word-row {
+  display: flex;
+  align-items: center;
+  padding: 13px 14px;
+  gap: 10px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.2s;
+}
+.word-row:last-child { border-bottom: none; }
+.word-row.state-goed { background: rgba(34,197,94,0.1); }
+.word-row.state-skip { background: rgba(255,255,255,0.02); }
+
+.wr-num {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--surface2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--txt-muted);
+  flex-shrink: 0;
+  transition: background 0.2s, color 0.2s;
+}
+.state-goed .wr-num { background: var(--green); color: white; }
+.state-skip .wr-num { background: var(--surface2); color: #333; }
+
+.wr-word {
+  flex: 1;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--txt);
+  transition: color 0.2s;
+}
+.state-goed .wr-word { color: var(--green); }
+.state-skip .wr-word { color: var(--txt-muted); text-decoration: line-through; }
+
+.wr-btns { display: flex; gap: 6px; flex-shrink: 0; }
+
+.wr-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 7px 12px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.1s, opacity 0.2s;
+}
+.wr-btn:active { transform: scale(0.9); }
+.wr-btn:disabled { opacity: 0.3; cursor: default; }
+.wr-btn.good { background: var(--green); color: white; }
+.wr-btn.skip { background: var(--surface2); color: var(--txt-muted); border: 1px solid var(--border); }
+
+/* ══════════════════════════════════════
+   ⑤ RESULT SCREEN
+══════════════════════════════════════ */
+.result-hero {
+  text-align: center;
+  padding: 16px 0 20px;
+}
+.result-tag { font-size: 0.75rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--txt-muted); }
+.result-score { font-size: 5.5rem; font-weight: 900; line-height: 1; color: var(--yellow); filter: drop-shadow(0 0 20px rgba(251,191,36,0.3)); }
+.result-sub { font-size: 0.9rem; color: var(--txt-muted); margin-top: 4px; }
+
+.result-words {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+.rw-item {
+  display: flex;
+  align-items: center;
+  padding: 11px 14px;
+  gap: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.rw-item:last-child { border-bottom: none; }
+.rw-icon { font-size: 1rem; flex-shrink: 0; }
+.rw-word { flex: 1; font-weight: 600; font-size: 0.95rem; }
+.rw-word.goed { color: var(--green); }
+.rw-word.miss { color: var(--txt-muted); }
+
+/* ══════════════════════════════════════
+   ⑥ WINNER SCREEN
+══════════════════════════════════════ */
+.winner-wrap { text-align: center; padding: 20px 0; }
+.winner-trophy { font-size: 4.5rem; margin-bottom: 12px; animation: float 2s ease-in-out infinite; }
+@keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
+.winner-label { font-size: 0.75rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--txt-muted); margin-bottom: 6px; }
+.winner-name { font-size: 3rem; font-weight: 900; margin-bottom: 24px; }
+
+.end-scores {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.end-tile {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  text-align: center;
+}
+.end-tile.winner { border-color: var(--yellow); background: rgba(251,191,36,0.06); }
+.end-tile-name { font-size: 0.8rem; color: var(--txt-muted); margin-bottom: 4px; }
+.end-tile-pts { font-size: 2.6rem; font-weight: 900; }
+.end-tile.winner .end-tile-pts { color: var(--yellow); }
+
+/* ══════════════════════════════════════
+   MODAL OVERLAY
+══════════════════════════════════════ */
+#modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+#modal-overlay.open { display: flex; }
+.modal-box {
+  background: var(--surface);
+  border: 1px solid var(--border-hi);
+  border-radius: 22px;
+  padding: 24px;
+  width: 100%;
+  max-width: 340px;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+.modal-title { font-size: 1.2rem; font-weight: 800; margin-bottom: 6px; }
+.modal-sub { font-size: 0.88rem; color: var(--txt-soft); margin-bottom: 20px; line-height: 1.5; }
+.modal-actions { display: flex; flex-direction: column; gap: 8px; }
+
+/* ══════════════════════════════════════
+   PULSE ANIM
+══════════════════════════════════════ */
+@keyframes pulse {
+  0%,100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.pulsing { animation: pulse 0.5s ease-in-out infinite; }
+
+/* ── Spelregels ── */
+.rule-block {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.rule-icon { font-size: 1.6rem; flex-shrink: 0; line-height: 1; margin-top: 2px; }
+.rule-body {}
+.rule-title { font-size: 0.9rem; font-weight: 800; color: var(--txt); margin-bottom: 4px; }
+.rule-text  { font-size: 0.84rem; color: var(--txt-soft); line-height: 1.55; }
+.rule-text strong { color: var(--txt); }
+
+.rules-divider {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--txt-muted);
+  margin: 16px 0 8px;
+}
+
+.nono-list { margin-top: 6px; display: flex; flex-direction: column; gap: 4px; }
+.nono-item {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 0.83rem; color: var(--txt-soft);
+}
+.nono-item::before { content: "✗"; color: var(--red); font-weight: 900; flex-shrink: 0; }
+
+.mode-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.mode-pill {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+  ① START SCREEN
+══════════════════════════════════════ -->
+<div id="screen-start" class="screen active">
+  <div class="content">
+    <div class="hero">
+      <div class="hero-num">30</div>
+      <div class="hero-sec">Seconds</div>
+      <div class="hero-sub">Omschrijf zo veel mogelijk woorden in 30 seconden!</div>
+    </div>
+
+    <div class="gap">
+      <div class="label">Teams &amp; niveau</div>
+      <div class="card">
+        <div class="team-row">
+          <div class="team-dot t1"></div>
+          <input type="text" id="team1-input" value="Team 1" maxlength="20" placeholder="Naam team 1">
+        </div>
+        <div class="team-age-row">
+          <span class="team-age-label">Niveau:</span>
+          <button class="team-age-btn" id="t1-k" onclick="setTeamAge(0,'k')">👶 Kind</button>
+          <button class="team-age-btn active-f" id="t1-f" onclick="setTeamAge(0,'f')">👨‍👩‍👧 Familie</button>
+          <button class="team-age-btn" id="t1-v" onclick="setTeamAge(0,'v')">🍷 Volwassen</button>
+        </div>
+
+        <div style="border-top:1px solid var(--border);margin:4px 0 10px"></div>
+
+        <div class="team-row" style="margin-bottom:0">
+          <div class="team-dot t2"></div>
+          <input type="text" id="team2-input" value="Team 2" maxlength="20" placeholder="Naam team 2">
+        </div>
+        <div class="team-age-row" style="margin-bottom:0">
+          <span class="team-age-label">Niveau:</span>
+          <button class="team-age-btn" id="t2-k" onclick="setTeamAge(1,'k')">👶 Kind</button>
+          <button class="team-age-btn active-f" id="t2-f" onclick="setTeamAge(1,'f')">👨‍👩‍👧 Familie</button>
+          <button class="team-age-btn" id="t2-v" onclick="setTeamAge(1,'v')">🍷 Volwassen</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="gap">
+      <div class="label">Speldoel</div>
+      <div class="goal-card">
+        <div class="goal-row">
+          <div>
+            <div class="goal-label">Spelen tot ... punten</div>
+            <div class="goal-sub">Eerste team dat dit haalt wint het spel · max 5 p. per ronde</div>
+          </div>
+          <select id="goal-select" class="goal-select">
+            <option value="15">15 pnt</option>
+            <option value="20">20 pnt</option>
+            <option value="30" selected>30 pnt</option>
+            <option value="40">40 pnt</option>
+            <option value="50">50 pnt</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="start-actions">
+      <button class="btn btn-primary" onclick="startGame()">▶ Spel starten</button>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-ghost" style="flex:1" onclick="goTo('screen-words')">📝 Woordenlijst</button>
+        <button class="btn btn-ghost" style="flex:1" onclick="goTo('screen-leaderboard')">🏆 Scorebord</button>
+      </div>
+      <button class="btn btn-ghost" onclick="goTo('screen-rules')">📖 Spelregels</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+  ② WORDS SCREEN
+══════════════════════════════════════ -->
+<div id="screen-words" class="screen">
+  <div class="topbar">
+    <button class="topbar-btn" onclick="goTo('screen-start')">← Terug</button>
+    <div class="topbar-title">Woordenlijst</div>
+    <div class="spacer"></div>
+  </div>
+  <div class="content">
+    <div class="words-stats" id="words-stats"></div>
+    <div class="add-row">
+      <input type="text" id="new-word-input" placeholder="Nieuw woord toevoegen..." maxlength="40"
+             onkeydown="if(event.key==='Enter') addCustomWord()">
+      <button class="btn btn-primary btn-sm" onclick="addCustomWord()">+ Toevoegen</button>
+    </div>
+    <div class="cat-picker">
+      <button class="cat-pick-btn" id="cp-k" onclick="setNewCat('k')">👶 Kinderen</button>
+      <button class="cat-pick-btn sel-f" id="cp-f" onclick="setNewCat('f')">👨‍👩‍👧 Familie</button>
+      <button class="cat-pick-btn" id="cp-v" onclick="setNewCat('v')">🍷 Volwassenen</button>
+    </div>
+
+    <div class="word-tabs">
+      <button class="word-tab active" id="tab-all"    onclick="setTab('all')">Alle woorden</button>
+      <button class="word-tab"        id="tab-custom" onclick="setTab('custom')">Eigen woorden</button>
+    </div>
+
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" id="word-search" type="text" placeholder="Zoeken..."
+             oninput="renderWordsScreen()">
+    </div>
+
+    <div class="word-list" id="word-list"></div>
+    <div class="gap">
+      <button class="btn btn-danger" onclick="clearCustomWords()">🗑 Alle eigen woorden wissen</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+  ③ BEURT SCREEN
+══════════════════════════════════════ -->
+<div id="screen-beurt" class="screen">
+  <div class="topbar">
+    <button class="topbar-btn" onclick="confirmExit()">✕ Stop</button>
+    <div class="topbar-title">Ronde <span id="beurt-ronde">1</span></div>
+    <div class="spacer"></div>
+  </div>
+  <div class="content">
+    <div class="beurt-hero">
+      <div class="beurt-tag">Nu aan de beurt</div>
+      <div class="beurt-naam" id="beurt-naam"></div>
+      <div class="niveau-badge niveau-f" id="beurt-niveau"></div>
+    </div>
+
+    <div class="label">Stand</div>
+    <div class="scores-grid" id="scores-grid"></div>
+
+    <div class="gap-lg">
+      <div class="uitleg-card">
+        <div class="uitleg-icon">💡</div>
+        <div class="uitleg-tekst">
+          Geef de telefoon aan <strong id="uitleg-team"></strong>. Omschrijf elk woord <strong>zonder het zelf te zeggen</strong>. Druk op <strong>✓ Goed!</strong> als het geraden is, of <strong>Skip</strong> om door te gaan.
+        </div>
+      </div>
+    </div>
+
+    <div class="gap-lg">
+      <button class="btn btn-primary" onclick="startRound()">⏱ Start timer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+  ④ PLAY SCREEN
+══════════════════════════════════════ -->
+<div id="screen-play" class="screen" style="overflow:hidden; padding:0 16px 16px;">
+  <div class="play-header">
+    <div class="timer-wrap">
+      <svg width="96" height="96" viewBox="0 0 96 96">
+        <circle class="timer-bg" cx="48" cy="48" r="42"/>
+        <circle class="timer-arc" id="timer-arc" cx="48" cy="48" r="42"/>
+      </svg>
+      <div class="timer-num" id="timer-num">30</div>
+    </div>
+    <div class="play-team-info">
+      <div class="play-team-label">Team</div>
+      <div class="play-team-name" id="play-team-name"></div>
+      <div class="niveau-badge niveau-f" id="play-niveau" style="margin-top:4px; display:inline-block; font-size:0.68rem; padding:2px 8px;"></div>
+    </div>
+    <button class="topbar-btn" onclick="confirmExit()" style="align-self:flex-start; margin-top:6px;">✕ Stop</button>
+  </div>
+  <div class="words-card" id="words-card"></div>
+</div>
+
+<!-- ══════════════════════════════════════
+  ⑤ RESULT SCREEN
+══════════════════════════════════════ -->
+<div id="screen-result" class="screen">
+  <div class="topbar">
+    <button class="topbar-btn" onclick="confirmExit()">✕ Stop</button>
+    <div class="topbar-title" id="result-team-topbar"></div>
+    <div class="spacer"></div>
+  </div>
+  <div class="content">
+    <div class="result-hero">
+      <div class="result-tag">Punten deze ronde</div>
+      <div class="result-score" id="result-score">0</div>
+      <div class="result-sub" id="result-sub"></div>
+    </div>
+    <div class="result-words" id="result-words"></div>
+    <div class="label">Totaalstand</div>
+    <div class="scores-grid" id="result-scores-grid"></div>
+    <div class="gap-lg">
+      <button class="btn btn-primary" id="btn-next" onclick="nextTurn()">▶ Volgende team</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+  ⑥ WINNER SCREEN
+══════════════════════════════════════ -->
+<div id="screen-winner" class="screen">
+  <div class="content">
+    <div class="winner-wrap">
+      <div class="winner-trophy">🏆</div>
+      <div class="winner-label">Winnaar</div>
+      <div class="winner-name" id="winner-name"></div>
+      <div class="end-scores" id="end-scores"></div>
+      <button class="btn btn-ghost" onclick="goTo('screen-start')" style="margin-bottom:10px;">🔄 Nieuw spel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+  ⑦ SPELREGELS SCREEN
+══════════════════════════════════════ -->
+<div id="screen-rules" class="screen">
+  <div class="topbar">
+    <button class="topbar-btn" onclick="goTo('screen-start')">← Terug</button>
+    <div class="topbar-title">📖 Spelregels</div>
+    <div class="spacer"></div>
+  </div>
+  <div class="content">
+
+    <div class="rule-block">
+      <div class="rule-icon">🎯</div>
+      <div class="rule-body">
+        <div class="rule-title">Doel van het spel</div>
+        <div class="rule-text">
+          Wees het eerste team dat het afgesproken aantal punten haalt
+          (standaard <strong>30 punten</strong>). Per ronde kun je maximaal
+          <strong>5 punten</strong> verdienen — één punt per goed geraden woord.
+        </div>
+      </div>
+    </div>
+
+    <div class="rule-block">
+      <div class="rule-icon">⏱</div>
+      <div class="rule-body">
+        <div class="rule-title">Hoe speel je een ronde?</div>
+        <div class="rule-text">
+          De omschrijver krijgt <strong>30 seconden</strong> en ziet 5 woorden.
+          Omschrijf elk woord zodat je teamgenoten het raden — zonder de klok te stoppen.
+          Tik op <strong>✓ Goed!</strong> als het geraden is, of <strong>Skip</strong>
+          om door te gaan naar het volgende woord.
+        </div>
+      </div>
+    </div>
+
+    <div class="rule-block" style="border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.05);">
+      <div class="rule-icon">🚫</div>
+      <div class="rule-body">
+        <div class="rule-title">Dit mag niet</div>
+        <div class="nono-list">
+          <div class="nono-item">Het woord zelf (of een deel ervan) zeggen</div>
+          <div class="nono-item">Letters of de beginletter noemen</div>
+          <div class="nono-item">Het woord spellen</div>
+          <div class="nono-item">Gebaren of mimiek gebruiken</div>
+          <div class="nono-item">Rijmen op het woord ("het rijmt op…")</div>
+          <div class="nono-item">Een woord overslaan en er later op terugkomen</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rule-block">
+      <div class="rule-icon">🔄</div>
+      <div class="rule-body">
+        <div class="rule-title">Beurten</div>
+        <div class="rule-text">
+          Teams spelen om beurten. Na elke ronde zie je hoeveel punten het team
+          heeft gescoord en wat de totaalstand is. Dan is het andere team aan de beurt.
+          Zorg dat de omschrijver <strong>niet</strong> het scherm ziet vóór de timer start!
+        </div>
+      </div>
+    </div>
+
+    <div class="rule-block">
+      <div class="rule-icon">💡</div>
+      <div class="rule-body">
+        <div class="rule-title">Tips voor goede omschrijvingen</div>
+        <div class="rule-text">
+          Begin met de categorie ("het is een dier…", "het is een film…").
+          Gebruik synoniemen, voorbeelden of situaties waarin je het woord tegenkomt.
+          Ga snel door naar het volgende woord als je vastloopt — elke seconde telt!
+        </div>
+      </div>
+    </div>
+
+    <div class="rules-divider">Leeftijdsmodi</div>
+
+    <div class="rule-block">
+      <div class="rule-icon">👶</div>
+      <div class="rule-body">
+        <div class="rule-title">Kinderen (8–12 jaar)</div>
+        <div class="rule-text">
+          Eenvoudige woorden die kinderen herkennen: dieren, tekenfilms, spelletjes,
+          schoolleven, Efteling, Minecraft en meer.
+        </div>
+      </div>
+    </div>
+
+    <div class="rule-block">
+      <div class="rule-icon">👨‍👩‍👧</div>
+      <div class="rule-body">
+        <div class="rule-title">Familie (voor iedereen)</div>
+        <div class="rule-text">
+          Kinderwoorden én bekendere onderwerpen voor tieners en volwassenen:
+          sporters, muziek, films, typisch Nederlandse dingen (IKEA, Buienradar, Koningsdag).
+        </div>
+      </div>
+    </div>
+
+    <div class="rule-block">
+      <div class="rule-icon">🍷</div>
+      <div class="rule-body">
+        <div class="rule-title">Volwassenen (18+)</div>
+        <div class="rule-text">
+          Familie-woorden én volwassen thema's: werk, uitgaan, financiën, reizen,
+          kroeg, casino en meer. <strong>Niet geschikt voor kinderen.</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="rule-block" style="border-color: rgba(167,139,250,0.3); background: rgba(167,139,250,0.05);">
+      <div class="rule-icon">⚡</div>
+      <div class="rule-body">
+        <div class="rule-title">Kinderen vs. volwassenen</div>
+        <div class="rule-text">
+          Stel per team een ander niveau in op het startscherm. Kinderen krijgen dan
+          makkelijkere woorden, volwassenen moeilijkere — zo kan iedereen meedoen
+          en blijft het spel eerlijk én uitdagend!
+        </div>
+      </div>
+    </div>
+
+    <div style="height:8px"></div>
+    <button class="btn btn-primary" onclick="goTo('screen-start')">▶ Spel starten</button>
+    <div style="height:16px"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+  ⑧ LEADERBOARD SCREEN
+══════════════════════════════════════ -->
+<div id="screen-leaderboard" class="screen" aria-label="scorebord">
+  <div class="topbar">
+    <button class="topbar-btn" onclick="goTo('screen-start')">← Terug</button>
+    <div class="topbar-title">🏆 Scorebord</div>
+    <div class="spacer"></div>
+  </div>
+  <div class="content">
+    <div id="lb-podium-wrap"></div>
+    <div class="label">Recente spellen</div>
+    <div id="lb-history"></div>
+    <button class="btn btn-danger" onclick="clearLeaderboard()" style="margin-top:8px;">🗑 Wis scorebord</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+  BEVESTIG-STOP MODAL
+══════════════════════════════════════ -->
+<div id="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-title">Spel stoppen?</div>
+    <div class="modal-sub">De huidige score gaat verloren. Weet je het zeker?</div>
+    <div class="modal-actions">
+      <button class="btn btn-danger" onclick="exitToStart()">Ja, stoppen</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Nee, verder spelen</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════
+   STANDAARD WOORDEN — cat: k=Kinderen f=Familie v=Volwassenen
+══════════════════════════════════════ */
+const DEFAULT_WORDS = [
+  // ── Dieren (allemaal geschikt voor kinderen) ──
+  {w:"Olifant",cat:"k"},{w:"Giraf",cat:"k"},{w:"Nijlpaard",cat:"k"},{w:"Neushoorn",cat:"k"},{w:"Cheetah",cat:"k"},
+  {w:"Dolfijn",cat:"k"},{w:"Haai",cat:"k"},{w:"Octopus",cat:"k"},{w:"Zeepaardje",cat:"k"},{w:"Orca",cat:"k"},
+  {w:"Pinguïn",cat:"k"},{w:"Flamingo",cat:"k"},{w:"Toekan",cat:"k"},{w:"Uil",cat:"k"},{w:"Papegaai",cat:"k"},
+  {w:"Kangoeroe",cat:"k"},{w:"Koala",cat:"k"},{w:"Platypus",cat:"k"},{w:"Struisvogel",cat:"k"},{w:"Chihuahua",cat:"k"},
+  {w:"Labrador",cat:"k"},{w:"Bulldog",cat:"k"},{w:"Dalmatier",cat:"k"},{w:"Teckel",cat:"k"},{w:"Hamster",cat:"k"},
+
+  // ── Eten: eenvoudig (k) ──
+  {w:"Stroopwafel",cat:"k"},{w:"Pizza",cat:"k"},{w:"Hamburger",cat:"k"},{w:"Pasta",cat:"k"},
+  {w:"Chocolade",cat:"k"},{w:"Kaas",cat:"k"},{w:"Pindakaas",cat:"k"},{w:"Nutella",cat:"k"},{w:"Ijs",cat:"k"},
+  {w:"Friet",cat:"k"},{w:"Wafel",cat:"k"},{w:"Pannenkoek",cat:"k"},{w:"Appeltaart",cat:"k"},{w:"Chips",cat:"k"},
+
+  // ── Eten: volwassener (v) ──
+  {w:"Bitterballen",cat:"v"},{w:"Haring",cat:"v"},{w:"Stamppot",cat:"v"},{w:"Erwtensoep",cat:"v"},
+  {w:"Sushi",cat:"v"},{w:"Paella",cat:"v"},{w:"Champagne",cat:"v"},{w:"Smoothie",cat:"f"},
+  {w:"Koffie",cat:"f"},{w:"Thee",cat:"k"},{w:"Croissant",cat:"f"},
+
+  // ── Landen: simpel (k) ──
+  {w:"Nederland",cat:"k"},{w:"België",cat:"k"},{w:"Duitsland",cat:"k"},{w:"Frankrijk",cat:"k"},
+  {w:"Italië",cat:"k"},{w:"Spanje",cat:"k"},
+
+  // ── Landen: familie (f) ──
+  {w:"Portugal",cat:"f"},{w:"Griekenland",cat:"f"},{w:"Turkije",cat:"f"},{w:"Egypte",cat:"f"},
+  {w:"Japan",cat:"f"},{w:"China",cat:"f"},{w:"India",cat:"f"},{w:"Brazilië",cat:"f"},{w:"Mexico",cat:"f"},
+
+  // ── Steden: simpel (k) ──
+  {w:"Amsterdam",cat:"k"},{w:"Parijs",cat:"k"},{w:"Londen",cat:"k"},{w:"New York",cat:"k"},
+
+  // ── Steden: familie (f) ──
+  {w:"Rotterdam",cat:"f"},{w:"Den Haag",cat:"f"},{w:"Utrecht",cat:"f"},{w:"Eindhoven",cat:"f"},
+  {w:"Rome",cat:"f"},{w:"Barcelona",cat:"f"},{w:"Miami",cat:"f"},{w:"Tokio",cat:"f"},
+  {w:"Dubai",cat:"f"},{w:"Sydney",cat:"f"},{w:"Berlijn",cat:"f"},
+
+  // ── Films & series: kinderen (k) ──
+  {w:"Frozen",cat:"k"},{w:"Shrek",cat:"k"},{w:"Minions",cat:"k"},{w:"Finding Nemo",cat:"k"},{w:"Up",cat:"k"},
+  {w:"Toy Story",cat:"k"},{w:"The Lion King",cat:"k"},{w:"Harry Potter",cat:"k"},
+  {w:"Spider-Man",cat:"k"},{w:"Batman",cat:"k"},{w:"Star Wars",cat:"k"},
+
+  // ── Films & series: familie (f) ──
+  {w:"Titanic",cat:"f"},{w:"Avatar",cat:"f"},{w:"Jurassic Park",cat:"f"},
+  {w:"Lord of the Rings",cat:"f"},{w:"Avengers",cat:"f"},
+  {w:"Stranger Things",cat:"f"},{w:"Friends",cat:"f"},{w:"Game of Thrones",cat:"f"},
+
+  // ── Films & series: volwassenen (v) ──
+  {w:"Squid Game",cat:"v"},{w:"Breaking Bad",cat:"v"},{w:"The Crown",cat:"v"},
+  {w:"Bridgerton",cat:"v"},{w:"Emily in Paris",cat:"v"},{w:"Sex and the City",cat:"v"},
+
+  // ── Muziek: familie (f) ──
+  {w:"Michael Jackson",cat:"f"},{w:"Madonna",cat:"f"},{w:"Beyoncé",cat:"f"},{w:"Taylor Swift",cat:"f"},
+  {w:"Ed Sheeran",cat:"f"},{w:"Justin Bieber",cat:"f"},{w:"Billie Eilish",cat:"f"},
+  {w:"Lady Gaga",cat:"f"},{w:"Rihanna",cat:"f"},{w:"The Beatles",cat:"f"},
+  {w:"Coldplay",cat:"f"},{w:"ABBA",cat:"f"},
+
+  // ── Muziek: volwassenen (v) ──
+  {w:"Elvis Presley",cat:"v"},{w:"Rolling Stones",cat:"v"},{w:"U2",cat:"v"},
+
+  // ── Nederlandse BN'ers: familie (f) ──
+  {w:"Johan Cruyff",cat:"f"},{w:"Marco van Basten",cat:"f"},{w:"Ruud Gullit",cat:"f"},
+  {w:"Arjen Robben",cat:"f"},{w:"Virgil van Dijk",cat:"f"},{w:"Max Verstappen",cat:"f"},
+  {w:"Lieke Martens",cat:"f"},{w:"Sifan Hassan",cat:"f"},{w:"Dafne Schippers",cat:"f"},
+  {w:"Marco Borsato",cat:"f"},{w:"Guus Meeuwis",cat:"f"},{w:"André Hazes",cat:"f"},
+  {w:"Davina Michelle",cat:"f"},
+
+  // ── Nederlandse BN'ers: volwassenen (v) ──
+  {w:"Anne Frank",cat:"v"},{w:"Vincent van Gogh",cat:"v"},{w:"Rembrandt",cat:"v"},
+  {w:"Erasmus",cat:"v"},{w:"Mata Hari",cat:"v"},
+  {w:"André Rieu",cat:"v"},{w:"Famke Janssen",cat:"v"},{w:"Carice van Houten",cat:"v"},
+  {w:"Doutzen Kroes",cat:"v"},{w:"Anouk",cat:"v"},{w:"Paul de Leeuw",cat:"v"},
+
+  // ── Sport: familie (f) ──
+  {w:"Voetbal",cat:"f"},{w:"Tennis",cat:"f"},{w:"Schaatsen",cat:"f"},{w:"Wielrennen",cat:"f"},
+  {w:"Zwemmen",cat:"k"},{w:"Formule 1",cat:"f"},{w:"Judo",cat:"f"},{w:"Boksen",cat:"f"},
+  {w:"Golf",cat:"f"},{w:"Basketbal",cat:"f"},{w:"Olympische Spelen",cat:"f"},
+  {w:"WK Voetbal",cat:"f"},{w:"Tour de France",cat:"f"},{w:"Roland Garros",cat:"v"},
+  {w:"Wimbledon",cat:"v"},{w:"Rafael Nadal",cat:"f"},{w:"Novak Djokovic",cat:"f"},
+  {w:"Serena Williams",cat:"f"},{w:"Lionel Messi",cat:"f"},{w:"Cristiano Ronaldo",cat:"f"},
+
+  // ── Fantasie / spelen: kinderen (k) ──
+  {w:"Zeemeermin",cat:"k"},{w:"Eenhoorn",cat:"k"},{w:"Piraat",cat:"k"},{w:"Ridder",cat:"k"},
+  {w:"Trampoline",cat:"k"},{w:"Regenboog",cat:"k"},{w:"Sinterklaas",cat:"k"},
+  {w:"Kerst",cat:"k"},{w:"Pasen",cat:"k"},{w:"Halloween",cat:"k"},{w:"Carnaval",cat:"k"},
+  {w:"Verjaardag",cat:"k"},
+
+  // ── Beroepen & dingen: familie (f) ──
+  {w:"Astronaut",cat:"f"},{w:"Tandarts",cat:"f"},{w:"Goochelaar",cat:"f"},
+  {w:"Vulkaan",cat:"f"},{w:"IJsberg",cat:"f"},{w:"Waterval",cat:"f"},{w:"Tornado",cat:"f"},
+
+  // ── Beroepen & dingen: volwassenen (v) ──
+  {w:"Archeoloog",cat:"v"},{w:"Vuurtorenwachter",cat:"v"},{w:"Vuurtoren",cat:"v"},
+  {w:"Vliegende schotel",cat:"v"},{w:"Tijdmachine",cat:"v"},
+  {w:"Bruiloft",cat:"v"},{w:"Diploma",cat:"v"},{w:"Loterij",cat:"v"},{w:"Jackpot",cat:"v"},
+
+  // ── Cruise-thema: familie (f) ──
+  {w:"Cruiseschip",cat:"f"},{w:"Zwembad",cat:"k"},{w:"Strand",cat:"k"},{w:"Palmboom",cat:"k"},
+  {w:"Snorkelen",cat:"f"},{w:"Duiken",cat:"f"},{w:"Dolfijnen spotten",cat:"f"},
+  {w:"Catamaran",cat:"f"},{w:"Cocktail",cat:"f"},{w:"Zonsondergang",cat:"f"},
+
+  // ── Cruise-thema: volwassenen (v) ──
+  {w:"Puerto Rico",cat:"v"},{w:"Bahamas",cat:"v"},{w:"Honduras",cat:"v"},{w:"Cozumel",cat:"v"},
+  {w:"Ocean Cay",cat:"v"},{w:"San Juan",cat:"v"},{w:"Roatán",cat:"v"},{w:"Mahahual",cat:"v"},
+  {w:"Koraalrif",cat:"v"},{w:"Anker",cat:"v"},{w:"Reddingsboei",cat:"v"},
+  {w:"Kapitein",cat:"f"},{w:"Zonsopgang",cat:"f"},{w:"Karibisch",cat:"v"},{w:"Buffet",cat:"f"},
+
+  // ── Kinderen: extra woorden ──
+  {w:"TikTok",cat:"k"},{w:"Frikandelbroodje",cat:"k"},{w:"Meester",cat:"k"},{w:"Donald Duck",cat:"k"},
+  {w:"Roblox",cat:"k"},{w:"Huiswerk",cat:"k"},{w:"Gymles",cat:"k"},{w:"Knikkeren",cat:"k"},
+  {w:"YouTube",cat:"k"},{w:"Efteling",cat:"k"},{w:"Gamen",cat:"k"},{w:"Schoolplein",cat:"k"},
+  {w:"Minecraft",cat:"k"},{w:"Snoepzak",cat:"k"},{w:"Enzo Knol",cat:"k"},{w:"Rugzak",cat:"k"},
+  {w:"Spreekbeurt",cat:"k"},{w:"Smartphone",cat:"k"},{w:"Traktatie",cat:"k"},{w:"Fidget spinner",cat:"k"},
+  {w:"Netflix",cat:"k"},{w:"Groep 8",cat:"k"},{w:"Zwemles",cat:"k"},{w:"Fortnite",cat:"k"},
+  {w:"Bibliotheek",cat:"k"},{w:"Nintendo Switch",cat:"k"},{w:"Kinderfeestje",cat:"k"},{w:"Popcorn",cat:"k"},
+  {w:"Schommel",cat:"k"},{w:"Schoolreisje",cat:"k"},{w:"Pokémon",cat:"k"},{w:"Beugel",cat:"k"},
+  {w:"Vakantie",cat:"k"},{w:"TikTok-dansje",cat:"k"},{w:"Lunchtrommel",cat:"k"},{w:"Super Mario",cat:"k"},
+  {w:"Pyjamaparty",cat:"k"},{w:"Strips",cat:"k"},{w:"Gymschoenen",cat:"k"},{w:"TikTokker",cat:"k"},
+  {w:"Pretpark",cat:"k"},{w:"Luizenmoeder",cat:"k"},{w:"Voetbalplaatjes",cat:"k"},{w:"Klokhuis",cat:"k"},
+  {w:"Schoolbord",cat:"k"},{w:"Jeugdjournaal",cat:"k"},{w:"Trakteren",cat:"k"},{w:"Donald Duck Pocket",cat:"k"},
+  {w:"Skateboard",cat:"k"},{w:"Energydrink",cat:"k"},{w:"Sparen",cat:"k"},{w:"YouTube-short",cat:"k"},
+  {w:"Blokfluit",cat:"k"},{w:"Spijbelen",cat:"k"},{w:"Geheime hut",cat:"k"},{w:"Brawl Stars",cat:"k"},
+  {w:"TikTok-trend",cat:"k"},{w:"Gymtas",cat:"k"},{w:"Glow-in-the-dark",cat:"k"},{w:"DuckTales",cat:"k"},
+  {w:"Donald Duck Weekblad",cat:"k"},{w:"Schooltas",cat:"k"},{w:"LEGO",cat:"k"},{w:"Game-over",cat:"k"},
+  {w:"Fanta",cat:"k"},{w:"Pokémon-kaart",cat:"k"},{w:"Glow-run",cat:"k"},{w:"Lasergame",cat:"k"},
+  {w:"Jump Square",cat:"k"},{w:"Dino's",cat:"k"},{w:"Waterballon",cat:"k"},{w:"Schoolreis",cat:"k"},
+  {w:"Hoverboard",cat:"k"},{w:"Kinderen voor Kinderen",cat:"k"},{w:"Slush puppy",cat:"k"},
+  {w:"Minecraft-huid",cat:"k"},{w:"Smartwatch",cat:"k"},{w:"Tussenuur",cat:"k"},{w:"Frisdrank",cat:"k"},
+  {w:"Spelcomputer",cat:"k"},{w:"Donald Duck pocketboek",cat:"k"},{w:"Kermis",cat:"k"},
+  {w:"Fidget toy",cat:"k"},{w:"Kinderdisco",cat:"k"},{w:"Skateboard-park",cat:"k"},
+  {w:"Schoolplein-voetbal",cat:"k"},{w:"YouTubekanaal",cat:"k"},{w:"Trampoline-park",cat:"k"},
+  {w:"Pizza-party",cat:"k"},{w:"Game-pc",cat:"k"},{w:"Gymleraar",cat:"k"},{w:"SpongeBob",cat:"k"},
+  {w:"Groep 7",cat:"k"},{w:"Slijm maken",cat:"k"},{w:"Geheime code",cat:"k"},{w:"Knikkerpot",cat:"k"},
+  {w:"Schoolbel",cat:"k"},{w:"Pokémon Go",cat:"k"},{w:"Roblox-avatar",cat:"k"},{w:"Speeltuin",cat:"k"},
+  {w:"Dino-plaatjes",cat:"k"},{w:"Lunchbox",cat:"k"},{w:"Nintendo",cat:"k"},{w:"Schoolkantine",cat:"k"},
+  {w:"Donald Duck-strip",cat:"k"},{w:"Glow-party",cat:"k"},{w:"Game-controller",cat:"k"},
+  {w:"Gymmeester",cat:"k"},{w:"Kauwgom",cat:"k"},{w:"PlayStation",cat:"k"},{w:"Schatkist",cat:"k"},
+  {w:"Fidgets",cat:"k"},{w:"Dino",cat:"k"},{w:"Rekenen",cat:"k"},{w:"YouTube-video",cat:"k"},
+  {w:"Suikerspin",cat:"k"},{w:"Fortnite-skin",cat:"k"},{w:"Skatebaan",cat:"k"},
+
+  // ── Familie: extra woorden ──
+  {w:"Albert Heijn",cat:"f"},{w:"Vaatwasser",cat:"f"},{w:"Spatula",cat:"f"},{w:"Kerstboom",cat:"f"},
+  {w:"Koningsdag",cat:"f"},{w:"Action",cat:"f"},{w:"Koffiezetapparaat",cat:"f"},{w:"Chocomel",cat:"f"},
+  {w:"Hema",cat:"f"},{w:"File",cat:"f"},{w:"Teletekst",cat:"f"},{w:"IKEA",cat:"f"},
+  {w:"Buienradar",cat:"f"},{w:"Marktplaats",cat:"f"},{w:"Caravan",cat:"f"},{w:"Sneeuwpop",cat:"f"},
+  {w:"Supermarkt",cat:"f"},{w:"Blokker",cat:"f"},{w:"Fietsband",cat:"f"},{w:"Tikkie",cat:"f"},
+  {w:"Oliebol",cat:"f"},{w:"Speculaas",cat:"f"},{w:"Bitterbal",cat:"f"},{w:"HEMA-rookworst",cat:"f"},
+  {w:"Koning Willem-Alexander",cat:"f"},{w:"Sneakers",cat:"f"},{w:"Barbecue",cat:"f"},
+  {w:"Postcodeloterij",cat:"f"},{w:"Monopoly",cat:"f"},{w:"Kaasfondue",cat:"f"},
+  {w:"Flitsmeister",cat:"f"},{w:"Kamperen",cat:"f"},{w:"Regendouche",cat:"f"},
+  {w:"Intratuin",cat:"f"},{w:"Airfryer",cat:"f"},{w:"Fietspad",cat:"f"},
+  {w:"Koningin Máxima",cat:"f"},{w:"Hondenweer",cat:"f"},{w:"Sinterklaasjournaal",cat:"f"},
+  {w:"Kruidvat",cat:"f"},{w:"Droogtrommel",cat:"f"},{w:"Slagroomtaart",cat:"f"},
+  {w:"Vakantiepark",cat:"f"},{w:"Eurovisie Songfestival",cat:"f"},{w:"Hagelslag",cat:"f"},
+  {w:"Thuisbezorgd",cat:"f"},{w:"Welkoop",cat:"f"},{w:"Kaasschaaf",cat:"f"},
+  {w:"Waddeneilanden",cat:"f"},{w:"Snert",cat:"f"},{w:"Rommelmarkt",cat:"f"},
+  {w:"Soundbar",cat:"f"},{w:"Jumbo",cat:"f"},{w:"TomTom",cat:"f"},{w:"Douwe Egberts",cat:"f"},
+  {w:"Kaasstengel",cat:"f"},{w:"Scheveningen",cat:"f"},{w:"Keukenhof",cat:"f"},
+  {w:"Calvé Pindakaas",cat:"f"},{w:"Unox-rookworst",cat:"f"},{w:"Regenkleding",cat:"f"},
+  {w:"HEMA-taart",cat:"f"},{w:"Marktplaats-koopje",cat:"f"},{w:"Tikkie-betaling",cat:"f"},
+  {w:"Caravan-vakantie",cat:"f"},{w:"File-melding",cat:"f"},{w:"Post NL",cat:"f"},
+  {w:"Albert Heijn-bonus",cat:"f"},{w:"Speculaaspop",cat:"f"},{w:"Bittergarnituur",cat:"f"},
+  {w:"Action-winkel",cat:"f"},{w:"Buienradar-app",cat:"f"},{w:"Koffietijd",cat:"f"},
+  {w:"Waddenzee",cat:"f"},{w:"HEMA-ontbijt",cat:"f"},{w:"Koningsdag-vrijmarkt",cat:"f"},
+  {w:"Airfryer-snack",cat:"f"},{w:"Monopoly-geld",cat:"f"},{w:"Flitsmeister-app",cat:"f"},
+  {w:"Intratuin-kerstshow",cat:"f"},{w:"Snert-soep",cat:"f"},{w:"Thuisbezorgd-koerier",cat:"f"},
+  {w:"Vakantiehuisje",cat:"f"},{w:"Sinterklaasgedicht",cat:"f"},{w:"Kruidvat-folder",cat:"f"},
+  {w:"Welkoop-winkel",cat:"f"},{w:"Eurovisie",cat:"f"},{w:"Vaatwasblokje",cat:"f"},
+  {w:"Kerstkransje",cat:"f"},{w:"Sneaker-winkel",cat:"f"},{w:"Barbecue-weer",cat:"f"},
+  {w:"Chocomel-warm",cat:"f"},{w:"Kampeertent",cat:"f"},{w:"Kaasfondue-pan",cat:"f"},
+  {w:"Teletekst-pagina",cat:"f"},{w:"Formule 1-race",cat:"f"},{w:"Queen Máxima",cat:"f"},
+
+  // ── Volwassenen: extra woorden ──
+  {w:"Hypotheek",cat:"v"},{w:"Kater",cat:"v"},{w:"Tinder",cat:"v"},{w:"OnlyFans",cat:"v"},
+  {w:"Bitcoin",cat:"v"},{w:"Belasting",cat:"v"},{w:"Afterparty",cat:"v"},{w:"Speciaalbier",cat:"v"},
+  {w:"Burn-out",cat:"v"},{w:"Dating",cat:"v"},{w:"Vrijmibo",cat:"v"},{w:"Espresso",cat:"v"},
+  {w:"Inflatie",cat:"v"},{w:"Lowlands",cat:"v"},{w:"Festival",cat:"v"},{w:"Salaris",cat:"v"},
+  {w:"ChatGPT",cat:"v"},{w:"Havermelk",cat:"v"},{w:"Crypto",cat:"v"},{w:"Daten",cat:"v"},
+  {w:"Studieschuld",cat:"v"},{w:"Botox",cat:"v"},{w:"Tequila",cat:"v"},{w:"Midlife",cat:"v"},
+  {w:"Pensioen",cat:"v"},{w:"Amuse",cat:"v"},{w:"Politiek",cat:"v"},{w:"Drankspel",cat:"v"},
+  {w:"Lastminute",cat:"v"},{w:"Ibiza",cat:"v"},{w:"Boomer",cat:"v"},{w:"Groepsapp",cat:"v"},
+  {w:"Speeddate",cat:"v"},{w:"Scharrel",cat:"v"},{w:"Premie",cat:"v"},{w:"Krediet",cat:"v"},
+  {w:"Bierglas",cat:"v"},{w:"Single",cat:"v"},{w:"Beleggen",cat:"v"},{w:"Shotje",cat:"v"},
+  {w:"Reality-tv",cat:"v"},{w:"Huisbaas",cat:"v"},{w:"Kantoor",cat:"v"},{w:"Overwerken",cat:"v"},
+  {w:"Match",cat:"v"},{w:"Casino",cat:"v"},{w:"Wijntje",cat:"v"},{w:"Barman",cat:"v"},
+  {w:"Alibi",cat:"v"},{w:"Clubbing",cat:"v"},{w:"Bouncer",cat:"v"},{w:"Sangria",cat:"v"},
+  {w:"VIP",cat:"v"},{w:"Vodka",cat:"v"},{w:"VIP-tafel",cat:"v"},{w:"Sigaar",cat:"v"},
+  {w:"Blackjack",cat:"v"},{w:"Roulette",cat:"v"},{w:"Poker",cat:"v"},{w:"Hangover",cat:"v"},
+  {w:"Uber",cat:"v"},{w:"Shoarma",cat:"v"},{w:"Kebab",cat:"v"},{w:"Nachtclub",cat:"v"},
+  {w:"Flirten",cat:"v"},{w:"Karaoke",cat:"v"},{w:"Gin-tonic",cat:"v"},{w:"Kroeg",cat:"v"},
+  {w:"Huurbaas",cat:"v"},{w:"Studio",cat:"v"},{w:"Loft",cat:"v"},{w:"Verhuizen",cat:"v"},
+  {w:"Borg",cat:"v"},{w:"Relatie",cat:"v"},{w:"Swipen",cat:"v"},{w:"Advocaat",cat:"v"},
+  {w:"Rechter",cat:"v"},{w:"Boete",cat:"v"},{w:"Flitser",cat:"v"},{w:"Justitie",cat:"v"},
+  {w:"Seks",cat:"v"},{w:"Condoom",cat:"v"},{w:"Pil",cat:"v"},{w:"Intiem",cat:"v"},
+  {w:"Liefde",cat:"v"},{w:"Bier",cat:"v"},{w:"Wijn",cat:"v"},{w:"Prosecco",cat:"v"},
+  {w:"Rosé",cat:"v"},{w:"Radler",cat:"v"},{w:"Vergadering",cat:"v"},{w:"Deadline",cat:"v"},
+  {w:"Baas",cat:"v"},{w:"Manager",cat:"v"},{w:"Bonus",cat:"v"},{w:"Promotie",cat:"v"},
+  {w:"Solliciteren",cat:"v"},{w:"CV",cat:"v"},{w:"Ontslag",cat:"v"},{w:"B&B",cat:"v"},
+  {w:"Robinson",cat:"v"},{w:"Reality",cat:"v"},{w:"Serie",cat:"v"},{w:"Streaming",cat:"v"},
+  {w:"Weekend",cat:"v"},{w:"Uitslapen",cat:"v"},{w:"Brunch",cat:"v"},{w:"Mimosa",cat:"v"},
+  {w:"Terras",cat:"v"},{w:"Elon Musk",cat:"v"},{w:"Twitter",cat:"v"},{w:"AI",cat:"v"},
+  {w:"Tech",cat:"v"},{w:"Startup",cat:"v"},{w:"Glamping",cat:"v"},{w:"Line-up",cat:"v"},
+  {w:"Ticket",cat:"v"},{w:"Tent",cat:"v"},{w:"Golddigger",cat:"v"},{w:"Miljonair",cat:"v"},
+  {w:"Yacht",cat:"v"},{w:"Kaviaar",cat:"v"},{w:"Detox",cat:"v"},{w:"Gym",cat:"v"},
+  {w:"Proteïne",cat:"v"},{w:"Shake",cat:"v"},{w:"Dieet",cat:"v"},{w:"Skivakantie",cat:"v"},
+  {w:"Après-ski",cat:"v"},{w:"Jägerbom",cat:"v"},{w:"Sneeuw",cat:"v"},{w:"Piste",cat:"v"},
+  {w:"Tattoo",cat:"v"},{w:"Piercing",cat:"v"},{w:"Inkt",cat:"v"},{w:"Design",cat:"v"},
+  {w:"Wellness",cat:"v"},{w:"Sauna",cat:"v"},{w:"Massage",cat:"v"},{w:"Spa",cat:"v"},
+  {w:"Relaxen",cat:"v"},{w:"Roadtrip",cat:"v"},{w:"Cabrio",cat:"v"},{w:"Benzine",cat:"v"},
+  {w:"Tolweg",cat:"v"},{w:"GPS",cat:"v"},{w:"Grill",cat:"v"},{w:"Vlees",cat:"v"},
+  {w:"Vega",cat:"v"},{w:"Winst",cat:"v"},{w:"Verlies",cat:"v"},{w:"Gokken",cat:"v"},
+  {w:"Fiches",cat:"v"},{w:"Familie",cat:"v"},{w:"Erfenis",cat:"v"},{w:"Testament",cat:"v"},
+];
+
+/* ══════════════════════════════════════
+   CUSTOM WORDS (localStorage) — formaat: [{w,cat}]
+══════════════════════════════════════ */
+function loadCustomWords() {
+  try {
+    const raw = JSON.parse(localStorage.getItem('custom_words') || '[]');
+    // migreer oud formaat (flat strings) naar nieuw formaat
+    return raw.map(item => typeof item === 'string' ? { w: item, cat: 'f' } : item);
+  } catch { return []; }
+}
+function saveCustomWords(arr) {
+  localStorage.setItem('custom_words', JSON.stringify(arr));
+}
+function getAllWords() {
+  // geeft altijd objecten {w, cat} terug
+  return [...DEFAULT_WORDS, ...loadCustomWords()];
+}
+
+// Categorie-labels en kleuren
+const CAT = {
+  k: { label: 'Kinderen', badge: 'badge-k', icon: '👶' },
+  f: { label: 'Familie',  badge: 'badge-f', icon: '👨‍👩‍👧' },
+  v: { label: 'Volwassen',badge: 'badge-v', icon: '🍷' },
+};
+
+/* ══════════════════════════════════════
+   GAME STATE
+══════════════════════════════════════ */
+let state = {
+  teams: [
+    { naam: 'Team 1', score: 0, ageMode: 'f' },
+    { naam: 'Team 2', score: 0, ageMode: 'f' }
+  ],
+  goal: 30,
+  activeTeam: 0,
+  ronde: 1,
+  words: [],
+  wordState: [],
+  timerSec: 30,
+  timerInterval: null,
+  usedWords: []
+};
+
+/* ══════════════════════════════════════
+   AUDIO (Web Audio API — 100% offline)
+══════════════════════════════════════ */
+let audioCtx = null;
+function getAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+function playTone(freq, dur, type = 'sine', vol = 0.3, delay = 0) {
+  try {
+    const ctx = getAudio();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.type = type; o.frequency.value = freq;
+    const t = ctx.currentTime + delay;
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    o.start(t); o.stop(t + dur + 0.02);
+  } catch(e) {}
+}
+function soundGoed() {
+  playTone(523, 0.08, 'sine', 0.25);
+  playTone(659, 0.12, 'sine', 0.25, 0.09);
+  playTone(784, 0.2,  'sine', 0.2,  0.18);
+}
+function soundSkip() {
+  playTone(350, 0.12, 'triangle', 0.15);
+  playTone(280, 0.12, 'triangle', 0.1, 0.1);
+}
+function soundTick() {
+  playTone(900, 0.04, 'square', 0.08);
+}
+function soundBuzzer() {
+  [0, 0.22, 0.44].forEach(d => playTone(100, 0.18, 'sawtooth', 0.4, d));
+}
+function soundWin() {
+  [0, 0.12, 0.24, 0.36, 0.52].forEach((d, i) => {
+    const notes = [523, 587, 659, 784, 1047];
+    playTone(notes[i], 0.25, 'sine', 0.25, d);
+  });
+}
+
+/* ══════════════════════════════════════
+   SCREEN NAV
+══════════════════════════════════════ */
+function goTo(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function confirmExit() {
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+function exitToStart() {
+  closeModal();
+  if (state.timerInterval) { clearInterval(state.timerInterval); state.timerInterval = null; }
+  goTo('screen-start');
+}
+
+/* ══════════════════════════════════════
+   WORD MANAGEMENT SCREEN
+══════════════════════════════════════ */
+let activeTab = 'all';
+let newWordCat = 'f';
+
+function setTab(tab) {
+  activeTab = tab;
+  document.getElementById('tab-all').classList.toggle('active', tab === 'all');
+  document.getElementById('tab-custom').classList.toggle('active', tab === 'custom');
+  renderWordsScreen();
+}
+
+function setNewCat(cat) {
+  newWordCat = cat;
+  ['k','f','v'].forEach(x => {
+    document.getElementById('cp-'+x).className = 'cat-pick-btn' + (x === cat ? ' sel-' + x : '');
+  });
+}
+
+function renderWordsScreen() {
+  const custom = loadCustomWords();
+  const total  = DEFAULT_WORDS.length + custom.length;
+  document.getElementById('words-stats').innerHTML = `
+    <div class="stat-pill"><strong>${total}</strong>Totaal</div>
+    <div class="stat-pill"><strong>${DEFAULT_WORDS.length}</strong>Standaard</div>
+    <div class="stat-pill"><strong>${custom.length}</strong>Eigen</div>
+  `;
+
+  const query = (document.getElementById('word-search')?.value || '').toLowerCase().trim();
+  const list  = document.getElementById('word-list');
+
+  let items = [];
+  if (activeTab !== 'custom') {
+    custom.forEach((o, i) => items.push({ w: o.w, cat: o.cat, type: 'custom', idx: i }));
+    DEFAULT_WORDS.forEach(o => items.push({ w: o.w, cat: o.cat, type: 'default', idx: -1 }));
+  } else {
+    custom.forEach((o, i) => items.push({ w: o.w, cat: o.cat, type: 'custom', idx: i }));
+  }
+
+  if (query) items = items.filter(it => it.w.toLowerCase().includes(query));
+
+  if (items.length === 0) {
+    list.innerHTML = activeTab === 'custom' && !query
+      ? '<div class="empty-state">Je hebt nog geen eigen woorden toegevoegd.<br>Typ hierboven en klik op Toevoegen.</div>'
+      : `<div class="empty-state">Geen woorden gevonden voor "<strong>${escHtml(query)}</strong>".</div>`;
+    return;
+  }
+
+  list.innerHTML = items.map(it => {
+    const c = CAT[it.cat] || CAT.f;
+    return `
+    <div class="word-item">
+      <span class="word-item-text">${escHtml(it.w)}</span>
+      <span class="word-item-badge ${c.badge}" title="${c.label}">${c.icon} ${c.label}</span>
+      ${it.type === 'custom'
+        ? `<button class="word-delete" onclick="deleteCustomWord(${it.idx})" title="Verwijderen">✕</button>`
+        : '<span style="width:22px;flex-shrink:0"></span>'}
+    </div>`;
+  }).join('');
+}
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function addCustomWord() {
+  const input = document.getElementById('new-word-input');
+  const val = input.value.trim();
+  if (!val) return;
+  const custom = loadCustomWords();
+  const allExisting = [...DEFAULT_WORDS.map(o => o.w), ...custom.map(o => o.w)];
+  if (allExisting.includes(val)) {
+    input.style.borderColor = 'var(--red)';
+    setTimeout(() => input.style.borderColor = '', 1000);
+    return;
+  }
+  custom.push({ w: val, cat: newWordCat });
+  saveCustomWords(custom);
+  input.value = '';
+  renderWordsScreen();
+}
+
+function deleteCustomWord(i) {
+  const custom = loadCustomWords();
+  custom.splice(i, 1);
+  saveCustomWords(custom);
+  renderWordsScreen();
+}
+
+function clearCustomWords() {
+  if (!confirm('Alle eigen woorden wissen?')) return;
+  saveCustomWords([]);
+  renderWordsScreen();
+}
+
+/* ══════════════════════════════════════
+   PER-TEAM NIVEAU
+══════════════════════════════════════ */
+const MODE_LABEL = { k:'👶 Kind', f:'👨‍👩‍👧 Familie', v:'🍷 Volwassen' };
+
+function setTeamAge(teamIdx, mode) {
+  state.teams[teamIdx].ageMode = mode;
+  const prefix = teamIdx === 0 ? 't1' : 't2';
+  ['k','f','v'].forEach(x => {
+    document.getElementById(`${prefix}-${x}`).className =
+      'team-age-btn' + (x === mode ? ' active-' + x : '');
+  });
+}
+
+/* ══════════════════════════════════════
+   GAME START
+══════════════════════════════════════ */
+function startGame() {
+  state.teams[0].naam    = document.getElementById('team1-input').value.trim() || 'Team 1';
+  state.teams[1].naam    = document.getElementById('team2-input').value.trim() || 'Team 2';
+  state.teams[0].score   = 0;
+  state.teams[1].score   = 0;
+  // ageMode is already set via setTeamAge buttons
+  state.goal       = parseInt(document.getElementById('goal-select').value);
+  state.activeTeam = 0;
+  state.ronde      = 1;
+  state.usedWords  = [];
+  state.used_0     = [];
+  state.used_1     = [];
+  showBeurt();
+}
+
+/* ══════════════════════════════════════
+   BEURT SCREEN
+══════════════════════════════════════ */
+function showBeurt() {
+  const t = state.teams[state.activeTeam];
+  document.getElementById('beurt-ronde').textContent = state.ronde;
+  document.getElementById('beurt-naam').textContent = t.naam;
+  document.getElementById('beurt-naam').style.color = state.activeTeam === 0 ? 'var(--team1)' : 'var(--team2)';
+  document.getElementById('uitleg-team').textContent = t.naam;
+  document.getElementById('scores-grid').innerHTML = renderScoresGrid(state.activeTeam);
+
+  // Toon niveau badge
+  const badge = document.getElementById('beurt-niveau');
+  badge.textContent = MODE_LABEL[t.ageMode];
+  badge.className = `niveau-badge niveau-${t.ageMode}`;
+
+  goTo('screen-beurt');
+}
+
+function renderScoresGrid(activeTeam) {
+  return state.teams.map((t, i) => {
+    const pct = Math.min(100, Math.round((t.score / state.goal) * 100));
+    const cls = i === 0 ? 't1' : 't2';
+    const act = i === activeTeam ? 'active-tile' : '';
+    return `
+      <div class="score-tile ${cls} ${act}">
+        <div class="score-tile-name">${escHtml(t.naam)}</div>
+        <div class="score-tile-pts">${t.score}</div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar ${cls}" style="width:${pct}%"></div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+/* ══════════════════════════════════════
+   ROUND / TIMER
+══════════════════════════════════════ */
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function pickWords() {
+  const mode    = state.teams[state.activeTeam].ageMode;
+  const allowed = mode === 'k' ? ['k'] : mode === 'f' ? ['k','f'] : ['f','v'];
+  const all     = getAllWords().filter(o => allowed.includes(o.cat));
+  // gebruik per-team usedWords zodat teams niet elkaars woorden opgebruiken
+  const teamKey = `used_${state.activeTeam}`;
+  if (!state[teamKey]) state[teamKey] = [];
+  const unused  = all.filter(o => !state[teamKey].includes(o.w));
+  const pool    = unused.length >= 5 ? unused : all; // reset als lijst leeg is
+  const picked  = shuffle(pool).slice(0, 5);
+  state[teamKey].push(...picked.map(o => o.w));
+  return picked.map(o => o.w);
+}
+
+const CIRCUMFERENCE = 2 * Math.PI * 42; // ≈ 264
+
+function startRound() {
+  state.words = pickWords();
+  state.wordState = Array(5).fill('open');
+  state.timerSec = 30;
+
+  const pt = state.teams[state.activeTeam];
+  document.getElementById('play-team-name').textContent = pt.naam;
+  document.getElementById('play-team-name').style.color = state.activeTeam === 0 ? 'var(--team1)' : 'var(--team2)';
+  const pniveau = document.getElementById('play-niveau');
+  pniveau.textContent = MODE_LABEL[pt.ageMode];
+  pniveau.className = `niveau-badge niveau-${pt.ageMode}`;
+  renderPlayWords();
+  updateTimerUI(30);
+
+  goTo('screen-play');
+  state.timerInterval = setInterval(tick, 1000);
+}
+
+function tick() {
+  state.timerSec--;
+  updateTimerUI(state.timerSec);
+  if (state.timerSec <= 5 && state.timerSec > 0) soundTick();
+  if (state.timerSec <= 0) endRound(true);
+}
+
+function updateTimerUI(sec) {
+  const arc = document.getElementById('timer-arc');
+  const num = document.getElementById('timer-num');
+  num.textContent = sec;
+  const offset = CIRCUMFERENCE * (1 - sec / 30);
+  arc.style.strokeDashoffset = offset;
+  arc.style.strokeDasharray = CIRCUMFERENCE;
+
+  if (sec <= 5) {
+    arc.style.stroke = 'var(--red)';
+    num.style.color = 'var(--red)';
+    num.classList.add('pulsing');
+  } else if (sec <= 10) {
+    arc.style.stroke = 'var(--team1)';
+    num.style.color = 'var(--team1)';
+    num.classList.remove('pulsing');
+  } else {
+    arc.style.stroke = 'var(--yellow)';
+    num.style.color = 'var(--txt)';
+    num.classList.remove('pulsing');
+  }
+}
+
+function renderPlayWords() {
+  document.getElementById('words-card').innerHTML = state.words.map((w, i) => {
+    const s = state.wordState[i];
+    const disabled = s !== 'open' ? 'disabled' : '';
+    return `
+      <div class="word-row state-${s}" id="wr-${i}">
+        <div class="wr-num">${s === 'goed' ? '✓' : s === 'skip' ? '—' : i + 1}</div>
+        <div class="wr-word">${escHtml(w)}</div>
+        <div class="wr-btns">
+          <button class="wr-btn good" onclick="markWord(${i},'goed')" ${disabled}>✓ Goed!</button>
+          <button class="wr-btn skip" onclick="markWord(${i},'skip')" ${disabled}>Skip</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function markWord(i, status) {
+  if (state.wordState[i] !== 'open') return;
+  state.wordState[i] = status;
+  if (status === 'goed') soundGoed(); else soundSkip();
+  renderPlayWords();
+  if (state.wordState.every(s => s !== 'open')) endRound(false);
+}
+
+function endRound(timeout) {
+  if (state.timerInterval) { clearInterval(state.timerInterval); state.timerInterval = null; }
+  if (timeout) soundBuzzer();
+  showResult();
+}
+
+/* ══════════════════════════════════════
+   RESULT SCREEN
+══════════════════════════════════════ */
+function showResult() {
+  const pts = state.wordState.filter(s => s === 'goed').length;
+  state.teams[state.activeTeam].score += pts;
+
+  document.getElementById('result-team-topbar').textContent = state.teams[state.activeTeam].naam;
+  document.getElementById('result-score').textContent = pts;
+  document.getElementById('result-sub').textContent = `Totaal: ${state.teams[state.activeTeam].score} / ${state.goal} punten`;
+
+  document.getElementById('result-words').innerHTML = state.words.map((w, i) => {
+    const goed = state.wordState[i] === 'goed';
+    const open = state.wordState[i] === 'open';
+    return `
+      <div class="rw-item">
+        <span class="rw-icon">${goed ? '✅' : open ? '⏰' : '➖'}</span>
+        <span class="rw-word ${goed ? 'goed' : 'miss'}">${escHtml(w)}</span>
+      </div>`;
+  }).join('');
+
+  document.getElementById('result-scores-grid').innerHTML = renderScoresGrid(-1);
+
+  const hasWinner = state.teams.some(t => t.score >= state.goal);
+  document.getElementById('btn-next').textContent = hasWinner ? '🏆 Bekijk winnaar' : '▶ Volgende team';
+
+  goTo('screen-result');
+}
+
+/* ══════════════════════════════════════
+   NEXT TURN / WINNER
+══════════════════════════════════════ */
+function nextTurn() {
+  const winnaarIdx = state.teams.findIndex(t => t.score >= state.goal);
+  if (winnaarIdx !== -1) {
+    showWinner(winnaarIdx);
+    return;
+  }
+  state.activeTeam = state.activeTeam === 0 ? 1 : 0;
+  if (state.activeTeam === 0) state.ronde++;
+  showBeurt();
+}
+
+function showWinner(idx) {
+  soundWin();
+  // Save to leaderboard
+  addToLeaderboard(
+    state.teams[idx].naam,     state.teams[idx].score,     state.teams[idx].ageMode,
+    state.teams[1-idx].naam,   state.teams[1-idx].score,   state.teams[1-idx].ageMode
+  );
+
+  const winner = state.teams[idx];
+  document.getElementById('winner-name').textContent = winner.naam;
+  document.getElementById('winner-name').style.color = idx === 0 ? 'var(--team1)' : 'var(--team2)';
+  document.getElementById('end-scores').innerHTML = state.teams.map((t, i) => `
+    <div class="end-tile ${i === idx ? 'winner' : ''}">
+      <div class="end-tile-name">${escHtml(t.naam)}</div>
+      <div class="end-tile-pts">${t.score}</div>
+    </div>`).join('');
+
+  // Add leaderboard button on winner screen
+  const existing = document.getElementById('btn-to-lb');
+  if (!existing) {
+    const wrap = document.querySelector('.winner-wrap');
+    const btn = document.createElement('button');
+    btn.id = 'btn-to-lb';
+    btn.className = 'btn btn-ghost';
+    btn.style.marginTop = '8px';
+    btn.textContent = '🏆 Bekijk scorebord';
+    btn.onclick = () => goTo('screen-leaderboard');
+    wrap.appendChild(btn);
+  }
+  goTo('screen-winner');
+}
+
+/* ══════════════════════════════════════
+   LEADERBOARD (localStorage)
+══════════════════════════════════════ */
+function loadLeaderboard() {
+  try { return JSON.parse(localStorage.getItem('leaderboard') || '[]'); } catch { return []; }
+}
+function saveLeaderboard(arr) {
+  localStorage.setItem('leaderboard', JSON.stringify(arr));
+}
+function addToLeaderboard(winnaar, winnaarPts, winnaarMode, verliezer, verliezerPts, verliezerMode) {
+  const lb = loadLeaderboard();
+  const now = new Date();
+  const datum = `${now.getDate()}-${now.getMonth()+1}-${now.getFullYear()}`;
+  const modeIcoon = m => m === 'k' ? '👶' : m === 'f' ? '👨‍👩‍👧' : '🍷';
+  lb.unshift({ winnaar, winnaarPts, winnaarMode, verliezer, verliezerPts, verliezerMode, datum,
+               modeIcon: modeIcoon(winnaarMode) });
+  if (lb.length > 50) lb.pop();
+  saveLeaderboard(lb);
+}
+function clearLeaderboard() {
+  if (!confirm('Weet je zeker dat je het volledige scorebord wilt wissen?')) return;
+  saveLeaderboard([]);
+  renderLeaderboard();
+}
+
+function renderLeaderboard() {
+  const lb = loadLeaderboard();
+  const podiumWrap = document.getElementById('lb-podium-wrap');
+  const histDiv    = document.getElementById('lb-history');
+
+  if (lb.length === 0) {
+    podiumWrap.innerHTML = '<div class="empty-state" style="margin-bottom:16px">Nog geen spellen gespeeld.<br>Speel een spel om hier te verschijnen!</div>';
+    histDiv.innerHTML = '';
+    return;
+  }
+
+  // Aggregate wins per team name
+  const wins = {};
+  lb.forEach(g => { wins[g.winnaar] = (wins[g.winnaar] || 0) + 1; });
+  const ranked = Object.entries(wins).sort((a, b) => b[1] - a[1]);
+
+  // Podium (top 3)
+  const medals = ['🥇','🥈','🥉'];
+  const places = ['first','second','third'];
+  const podiumItems = [0, 1, 2].map(i => {
+    if (!ranked[i]) return `<div class="lb-place ${places[i]}"><div class="lb-medal" style="opacity:0.2">${medals[i]}</div><div class="lb-team">—</div><div class="lb-wins">0</div><div class="lb-sub">overwinningen</div></div>`;
+    return `<div class="lb-place ${places[i]}"><div class="lb-medal">${medals[i]}</div><div class="lb-team">${escHtml(ranked[i][0])}</div><div class="lb-wins">${ranked[i][1]}</div><div class="lb-sub">${ranked[i][1] === 1 ? 'overwinning' : 'overwinningen'}</div></div>`;
+  });
+  podiumWrap.innerHTML = `<div class="lb-podium">${podiumItems.join('')}</div>`;
+
+  // History list (max 10 recent)
+  const recent = lb.slice(0, 10);
+  histDiv.innerHTML = `<div class="history-list">${recent.map(g => `
+    <div class="history-item">
+      <span class="hi-trophy">🏆</span>
+      <div class="hi-info">
+        <div class="hi-winner">${escHtml(g.winnaar)}</div>
+        <div class="hi-meta">
+        vs ${escHtml(g.verliezer)}${g.verliezerMode ? ' ' + (g.verliezerMode==='k'?'👶':g.verliezerMode==='f'?'👨‍👩‍👧':'🍷') : ''}
+        · ${g.datum}
+      </div>
+      </div>
+      <div class="hi-score">${g.winnaarPts} – ${g.verliezerPts}</div>
+    </div>`).join('')}
+  </div>`;
+}
+
+/* ══════════════════════════════════════
+   INIT
+══════════════════════════════════════ */
+document.getElementById('screen-words').addEventListener('click', () => {}, { once: true });
+document.querySelectorAll('button, input').forEach(el => {
+  el.addEventListener('click', () => { try { getAudio(); } catch(e) {} }, { once: true });
+});
+
+// PWA Service Worker
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js").catch(()=>{});
+}
+
+// render data screens when navigated to
+const origGoTo = goTo;
+window.goTo = function(id) {
+  origGoTo(id);
+  if (id === 'screen-words') renderWordsScreen();
+  if (id === 'screen-leaderboard') renderLeaderboard();
+};
+</script>
+</body>
+</html>
