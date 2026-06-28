@@ -1466,6 +1466,7 @@ let state = {
 let audioCtx = null;
 function getAudio() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
   return audioCtx;
 }
 function playTone(freq, dur, type = 'sine', vol = 0.3, delay = 0) {
